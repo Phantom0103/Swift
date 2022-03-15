@@ -1,2 +1,7 @@
 server:
   port: 8080
+
+swift:
+  rpc:
+    server:
+      port: 5022

@@ -12,6 +12,7 @@
     <modules>
         <module>Swift-Server</module>
         <module>Swift-Client</module>
+        <module>facade</module>
     </modules>
 
     <properties>
@@ -33,6 +34,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
             <version>2.5.10</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.36</version>
         </dependency>
     </dependencies>
 
