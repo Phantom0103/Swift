@@ -18,7 +18,7 @@ public class SwiftServerHandler extends SimpleChannelInboundHandler<RpcRequest> 
 
     private Map<String, Object> rpcServiceMap;
 
-    public SwiftServerHandler(Map<String, Object> rpcServiceMap) {
+    SwiftServerHandler(Map<String, Object> rpcServiceMap) {
         this.rpcServiceMap = rpcServiceMap;
     }
 
