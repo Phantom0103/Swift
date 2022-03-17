@@ -1,6 +1,6 @@
-package com.wenxia.swift.server.codec;
+package com.wenxia.swift.common.codec;
 
-import com.wenxia.swift.server.protocol.SwiftMessage;
+import com.wenxia.swift.common.protocol.SwiftMessage;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;

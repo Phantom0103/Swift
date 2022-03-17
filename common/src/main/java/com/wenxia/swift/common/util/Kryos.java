@@ -1,10 +1,10 @@
-package com.wenxia.swift.server.kryo;
+package com.wenxia.swift.common.util;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
-import com.wenxia.swift.server.protocol.RpcRequest;
-import com.wenxia.swift.server.protocol.RpcResponse;
+import com.wenxia.swift.common.protocol.RpcRequest;
+import com.wenxia.swift.common.protocol.RpcResponse;
 import de.javakaffee.kryoserializers.SynchronizedCollectionsSerializer;
 import de.javakaffee.kryoserializers.UnmodifiableCollectionsSerializer;
 

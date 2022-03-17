@@ -1,4 +1,4 @@
-package com.wenxia.swift.server.protocol;
+package com.wenxia.swift.common.protocol;
 
 /**
  * @author zhouw

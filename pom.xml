@@ -13,6 +13,7 @@
         <module>Swift-Server</module>
         <module>Swift-Client</module>
         <module>facade</module>
+        <module>common</module>
     </modules>
 
     <properties>

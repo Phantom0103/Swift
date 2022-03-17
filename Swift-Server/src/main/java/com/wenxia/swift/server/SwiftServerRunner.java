@@ -1,7 +1,7 @@
 package com.wenxia.swift.server;
 
-import com.wenxia.swift.server.codec.KryoDecoder;
-import com.wenxia.swift.server.codec.KryoEncoder;
+import com.wenxia.swift.common.codec.KryoDecoder;
+import com.wenxia.swift.common.codec.KryoEncoder;
 import com.wenxia.swift.server.protocol.RpcService;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
@@ -11,6 +11,7 @@ import io.netty.channel.ChannelPipeline;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -26,6 +27,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static com.wenxia.swift.common.SystemPro.DEFAULT_SERVER_PORT;
+
 /**
  * @author zhouw
  * @date 2022-03-14
@@ -36,7 +39,6 @@ public class SwiftServerRunner implements ApplicationRunner, ApplicationContextA
     private static final Logger LOGGER = LoggerFactory.getLogger(SwiftServerRunner.class);
 
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
-
 
     @Autowired
     private Environment env;
@@ -55,7 +57,8 @@ public class SwiftServerRunner implements ApplicationRunner, ApplicationContextA
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        int port = Integer.valueOf(env.getProperty("swift.rpc.server.port", "5022"));
+        String portV = env.getProperty("swift.rpc.server.port");
+        int port = StringUtils.isBlank(portV) ? DEFAULT_SERVER_PORT : Integer.valueOf(portV);
         start(port);
     }
 
@@ -65,8 +68,8 @@ public class SwiftServerRunner implements ApplicationRunner, ApplicationContextA
             return;
         }
 
-        NioEventLoopGroup bossGroup = new NioEventLoopGroup(1);
-        NioEventLoopGroup workerGroup = new NioEventLoopGroup(16);
+        final NioEventLoopGroup bossGroup = new NioEventLoopGroup(1);
+        final NioEventLoopGroup workerGroup = new NioEventLoopGroup(16);
         try {
             SwiftServerHandler handler = new SwiftServerHandler(rpcServiceMap);
             ServerBootstrap bootstrap = new ServerBootstrap();

@@ -1,9 +1,9 @@
 package com.wenxia.swift.server;
 
-import com.wenxia.swift.server.kryo.Kryos;
-import com.wenxia.swift.server.protocol.RpcRequest;
-import com.wenxia.swift.server.protocol.RpcResponse;
-import com.wenxia.swift.server.protocol.SwiftMessage;
+import com.wenxia.swift.common.protocol.RpcRequest;
+import com.wenxia.swift.common.protocol.RpcResponse;
+import com.wenxia.swift.common.protocol.SwiftMessage;
+import com.wenxia.swift.common.util.Kryos;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
