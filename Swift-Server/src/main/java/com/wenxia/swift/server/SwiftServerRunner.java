@@ -1,10 +1,13 @@
 package com.wenxia.swift.server;
 
+import com.wenxia.swift.server.codec.KryoDecoder;
+import com.wenxia.swift.server.codec.KryoEncoder;
 import com.wenxia.swift.server.protocol.RpcService;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
+import io.netty.channel.ChannelPipeline;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -74,8 +77,11 @@ public class SwiftServerRunner implements ApplicationRunner, ApplicationContextA
                     .childOption(ChannelOption.TCP_NODELAY, true)
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
-                        protected void initChannel(SocketChannel socketChannel) throws Exception {
-                            socketChannel.pipeline().addLast(handler);
+                        protected void initChannel(SocketChannel channel) throws Exception {
+                            ChannelPipeline pipeline = channel.pipeline();
+                            pipeline.addLast(new KryoDecoder());
+                            pipeline.addLast(new KryoEncoder());
+                            pipeline.addLast(handler);
                         }
                     });
             ChannelFuture channelFuture = bootstrap.bind(port).sync();

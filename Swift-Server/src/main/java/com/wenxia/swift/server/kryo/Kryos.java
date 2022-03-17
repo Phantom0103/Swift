@@ -17,22 +17,19 @@ import java.io.ByteArrayOutputStream;
  */
 public class Kryos {
 
-    private static final ThreadLocal<Kryo> KRYOS = new ThreadLocal<Kryo>() {
-        @Override
-        protected Kryo initialValue() {
-            Kryo kryo = new Kryo();
-            kryo.register(RpcRequest.class);
-            kryo.register(RpcResponse.class);
-            kryo.register(Class.class);
-            kryo.register(Class[].class);
-            kryo.register(Object[].class);
+    private static final ThreadLocal<Kryo> KRYOS = ThreadLocal.withInitial(() -> {
+        Kryo kryo = new Kryo();
+        kryo.register(RpcRequest.class);
+        kryo.register(RpcResponse.class);
+        kryo.register(Class.class);
+        kryo.register(Class[].class);
+        kryo.register(Object[].class);
 
-            UnmodifiableCollectionsSerializer.registerSerializers(kryo);
-            SynchronizedCollectionsSerializer.registerSerializers(kryo);
+        UnmodifiableCollectionsSerializer.registerSerializers(kryo);
+        SynchronizedCollectionsSerializer.registerSerializers(kryo);
 
-            return kryo;
-        }
-    };
+        return kryo;
+    });
 
     public static byte[] serialize(Object object) {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
