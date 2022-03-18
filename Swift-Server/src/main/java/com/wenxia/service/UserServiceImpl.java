@@ -30,7 +30,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> listUser(String source, int pageNo, int pageSize) {
+    public List<User> listUsers(String source, int pageNo, int pageSize) {
         List<User> users = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
             User user = new User();

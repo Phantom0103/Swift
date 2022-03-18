@@ -12,5 +12,5 @@ public interface UserService {
 
     User findUser(String userId);
 
-    List<User> listUser(String source, int pageNo, int pageSize);
+    List<User> listUsers(String source, int pageNo, int pageSize);
 }

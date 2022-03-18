@@ -58,7 +58,7 @@ public class SwiftServerRunner implements ApplicationRunner, ApplicationContextA
     @Override
     public void run(ApplicationArguments args) throws Exception {
         String portV = env.getProperty("swift.rpc.server.port");
-        int port = StringUtils.isBlank(portV) ? DEFAULT_SERVER_PORT : Integer.valueOf(portV);
+        int port = StringUtils.isBlank(portV) ? DEFAULT_SERVER_PORT : Integer.parseInt(portV);
         start(port);
     }
 

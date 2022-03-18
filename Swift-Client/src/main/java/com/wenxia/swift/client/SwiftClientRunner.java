@@ -1,5 +1,6 @@
 package com.wenxia.swift.client;
 
+import com.wenxia.facade.service.UserService;
 import com.wenxia.swift.common.codec.KryoDecoder;
 import com.wenxia.swift.common.codec.KryoEncoder;
 import io.netty.bootstrap.Bootstrap;
@@ -17,6 +18,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 
 /**
  * @author zhouw
@@ -68,5 +74,17 @@ public class SwiftClientRunner {
             group.shutdownGracefully();
             throw new RuntimeException("Failed to start SwiftRPC client", e);
         }
+    }
+
+    public static void main(String[] args) throws Exception {
+        Class clazz = Proxy.getProxyClass(UserService.class.getClassLoader(),UserService.class.getInterfaces());
+        Constructor constructor = clazz.getConstructor(InvocationHandler.class);
+        Object proxy = constructor.newInstance(new InvocationHandler() {
+            @Override
+            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                Object result = method.invoke(proxy, args);
+                return result;
+            }
+        });
     }
 }
