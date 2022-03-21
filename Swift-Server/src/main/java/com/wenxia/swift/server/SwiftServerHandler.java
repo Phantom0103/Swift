@@ -34,7 +34,7 @@ public class SwiftServerHandler extends SimpleChannelInboundHandler<SwiftMessage
         RpcRequest request = Kryos.deserialize(content, RpcRequest.class);
 
         if (request == null) {
-            throw new RuntimeException("Deserialize RpcRequest exception");
+            throw new RuntimeException("反序列化RpcRequest异常，获取RpcRequest为空");
         }
 
         RpcResponse response = new RpcResponse();
@@ -55,7 +55,7 @@ public class SwiftServerHandler extends SimpleChannelInboundHandler<SwiftMessage
         String className = request.getClassName();
         Object rpcService = rpcServiceMap.get(className);
         if (rpcService == null) {
-            throw new RuntimeException("rpc service '" + className + "' not found");
+            throw new RuntimeException("未找到RPC服务类：" + className);
         }
 
         String methodName = request.getMethodName();
@@ -69,7 +69,7 @@ public class SwiftServerHandler extends SimpleChannelInboundHandler<SwiftMessage
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        LOGGER.error("An error occurred in SwiftServerHandler", cause);
+        LOGGER.error("SwiftServerHandler发生异常，关闭链接", cause);
         ctx.close();
     }
 }

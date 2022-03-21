@@ -51,7 +51,7 @@ public class SwiftServerRunner implements ApplicationRunner, ApplicationContextA
         for (Object bean : map.values()) {
             String beanName = bean.getClass().getName();
             rpcServiceMap.put(beanName, bean);
-            LOGGER.info("SwiftRPC server loaded service: " + beanName);
+            LOGGER.info("加载RPC服务类：" + beanName);
         }
     }
 
@@ -64,7 +64,7 @@ public class SwiftServerRunner implements ApplicationRunner, ApplicationContextA
 
     private void start(int port) {
         if (isRunning.get()) {
-            LOGGER.info("SwiftRPC server is already running");
+            LOGGER.info("SwiftRPC服务已经在运行中");
             return;
         }
 
@@ -88,13 +88,13 @@ public class SwiftServerRunner implements ApplicationRunner, ApplicationContextA
                         }
                     });
             ChannelFuture channelFuture = bootstrap.bind(port).sync();
-            LOGGER.info("SwiftRPC server started on port: " + port);
+            LOGGER.info("SwiftRPC服务已经启动，端口：" + port);
             channelFuture.channel().closeFuture().sync();
         } catch (Exception e) {
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
 
-            throw new RuntimeException("Failed to start SwiftRPC server", e);
+            throw new RuntimeException("启动SwiftRPC服务失败", e);
         }
     }
 }
