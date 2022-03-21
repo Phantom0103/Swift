@@ -1,34 +1,60 @@
 package com.wenxia.swift.scan;
 
-import org.springframework.beans.BeansException;
+import com.wenxia.swift.common.annotation.SwiftRpcService;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
+import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.context.annotation.ClassPathBeanDefinitionScanner;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
+import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.core.type.filter.AnnotationTypeFilter;
+import org.springframework.stereotype.Component;
 
-import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
  * @author zhouw
  * @date 2022-03-18
  */
-public class SwiftRpcServiceRegister implements ImportBeanDefinitionRegistrar, BeanDefinitionRegistryPostProcessor {
+@Component
+public class SwiftRpcServiceRegister implements ImportBeanDefinitionRegistrar {
 
     @Override
-    public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry beanDefinitionRegistry) throws BeansException {
+    public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
+        Map<String, Object> annotationAttributes = importingClassMetadata.getAnnotationAttributes(SwiftRpcServiceScan.class.getName());
+        if (annotationAttributes != null) {
+            String[] packages = (String[]) annotationAttributes.get("packages");
+            SwiftRpcClassPathBeanDefinitionScanner scanner = new SwiftRpcClassPathBeanDefinitionScanner(registry);
 
+            if (packages == null || packages.length == 0) {
+                // log
+                return;
+            }
+
+            for (String pkg : packages) {
+                Set<BeanDefinition> beanDefinitions = scanner.findCandidateComponents(pkg);
+                if (beanDefinitions.isEmpty()) {
+                    continue;
+                }
+
+                for (BeanDefinition definition : beanDefinitions) {
+                    ((GenericBeanDefinition) definition).setBeanClass(null);
+                    ((GenericBeanDefinition) definition).setAutowireMode(GenericBeanDefinition.AUTOWIRE_BY_TYPE);
+                }
+            }
+        }
     }
 
-    @Override
-    public void postProcessBeanFactory(ConfigurableListableBeanFactory configurableListableBeanFactory) throws BeansException {
+    static class SwiftRpcClassPathBeanDefinitionScanner extends ClassPathBeanDefinitionScanner {
 
-    }
+        public SwiftRpcClassPathBeanDefinitionScanner(BeanDefinitionRegistry registry) {
+            super(registry, false);
+        }
 
-    private Set<BeanDefinition> scanPackages(ClassPathBeanDefinitionScanner scanner) {
-        Set<BeanDefinition> set = new HashSet<>();
-        return set;
+        @Override
+        protected void registerDefaultFilters() {
+            addIncludeFilter(new AnnotationTypeFilter(SwiftRpcService.class));
+        }
     }
 }
