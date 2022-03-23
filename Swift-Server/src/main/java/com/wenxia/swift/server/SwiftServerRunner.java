@@ -21,6 +21,7 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.env.Environment;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -43,6 +44,9 @@ public class SwiftServerRunner implements ApplicationRunner, ApplicationContextA
     @Autowired
     private Environment env;
 
+    @Autowired
+    private RedisTemplate redisTemplate;
+
     private final Map<String, Object> rpcServiceMap = new HashMap<>();
 
     @Override
@@ -59,10 +63,11 @@ public class SwiftServerRunner implements ApplicationRunner, ApplicationContextA
     public void run(ApplicationArguments args) throws Exception {
         String portV = env.getProperty("swift.rpc.server.port");
         int port = StringUtils.isBlank(portV) ? DEFAULT_SERVER_PORT : Integer.parseInt(portV);
-        start(port);
+        String serverName = env.getProperty("swift.rpc.server.name");
+        start(port, serverName);
     }
 
-    private void start(int port) {
+    private void start(int port, String serverName) {
         if (isRunning.get()) {
             LOGGER.info("SwiftRPC服务已经在运行中");
             return;
@@ -88,7 +93,10 @@ public class SwiftServerRunner implements ApplicationRunner, ApplicationContextA
                         }
                     });
             ChannelFuture channelFuture = bootstrap.bind(port).sync();
+            registerRpcServer("localhost:" + port, serverName);
+
             LOGGER.info("SwiftRPC服务已经启动，端口：" + port);
+
             channelFuture.channel().closeFuture().sync();
         } catch (Exception e) {
             bossGroup.shutdownGracefully();
@@ -96,5 +104,9 @@ public class SwiftServerRunner implements ApplicationRunner, ApplicationContextA
 
             throw new RuntimeException("启动SwiftRPC服务失败", e);
         }
+    }
+
+    private void registerRpcServer(String rpcServer, String serverName) throws Exception {
+        System.out.println(redisTemplate.keys("*"));
     }
 }

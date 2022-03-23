@@ -1,7 +1,13 @@
 server:
   port: 8080
 
+spring:
+  redis:
+    host: localhost
+    port: 6379
+
 swift:
   rpc:
     server:
+      name: rpc-user-server
       port: 5022
