@@ -45,7 +45,7 @@ public class SwiftServerRunner implements ApplicationRunner, ApplicationContextA
     private Environment env;
 
     @Autowired
-    private RedisTemplate redisTemplate;
+    private RedisTemplate<String, Object> redisTemplate;
 
     private final Map<String, Object> rpcServiceMap = new HashMap<>();
 
@@ -93,7 +93,9 @@ public class SwiftServerRunner implements ApplicationRunner, ApplicationContextA
                         }
                     });
             ChannelFuture channelFuture = bootstrap.bind(port).sync();
-            registerRpcServer("localhost:" + port, serverName);
+
+            String rpcServer = "127.0.0.1:" + port;
+            registerRpcServer(rpcServer, serverName);
 
             LOGGER.info("SwiftRPC服务已经启动，端口：" + port);
 
@@ -107,6 +109,6 @@ public class SwiftServerRunner implements ApplicationRunner, ApplicationContextA
     }
 
     private void registerRpcServer(String rpcServer, String serverName) throws Exception {
-        System.out.println(redisTemplate.keys("*"));
+        redisTemplate.opsForHash().put("rpc-server", serverName, rpcServer);
     }
 }
