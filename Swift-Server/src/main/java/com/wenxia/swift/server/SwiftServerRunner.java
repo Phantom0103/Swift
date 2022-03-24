@@ -53,9 +53,12 @@ public class SwiftServerRunner implements ApplicationRunner, ApplicationContextA
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         Map<String, Object> map = applicationContext.getBeansWithAnnotation(RpcService.class);
         for (Object bean : map.values()) {
-            String beanName = bean.getClass().getName();
-            rpcServiceMap.put(beanName, bean);
-            LOGGER.info("加载RPC服务类：" + beanName);
+            Class<?>[] rpcInterfaces = bean.getClass().getInterfaces();
+            for (Class<?> rpcInterface : rpcInterfaces) {
+                String rpcInterfaceName = rpcInterface.getName();
+                rpcServiceMap.put(rpcInterfaceName, bean);
+                LOGGER.info("加载RPC服务类：{}", rpcInterfaceName);
+            }
         }
     }
 
@@ -93,14 +96,16 @@ public class SwiftServerRunner implements ApplicationRunner, ApplicationContextA
                         }
                     });
             ChannelFuture channelFuture = bootstrap.bind(port).sync();
+            isRunning.set(true);
 
             String rpcServer = "127.0.0.1:" + port;
-            registerRpcServer(rpcServer, serverName);
+            registerRpcServer(serverName, rpcServer);
 
-            LOGGER.info("SwiftRPC服务已经启动，端口：" + port);
+            LOGGER.info("SwiftRPC服务已经启动，端口：{}", port);
 
             channelFuture.channel().closeFuture().sync();
         } catch (Exception e) {
+            isRunning.set(false);
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
 
@@ -108,7 +113,7 @@ public class SwiftServerRunner implements ApplicationRunner, ApplicationContextA
         }
     }
 
-    private void registerRpcServer(String rpcServer, String serverName) throws Exception {
+    private void registerRpcServer(String serverName, String rpcServer) throws Exception {
         redisTemplate.opsForHash().put("rpc-server", serverName, rpcServer);
     }
 }

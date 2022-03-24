@@ -8,5 +8,5 @@ spring:
 
 swift:
   rpc:
-    server:
-      port: 5022
+    servers:
+      - rpc-user-server
