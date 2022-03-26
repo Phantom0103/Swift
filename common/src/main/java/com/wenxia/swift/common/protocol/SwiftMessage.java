@@ -9,6 +9,11 @@ public class SwiftMessage {
     private int length;
     private byte[] content;
 
+    public SwiftMessage(int length, byte[] content) {
+        this.length = length;
+        this.content = content;
+    }
+
     public int getLength() {
         return length;
     }

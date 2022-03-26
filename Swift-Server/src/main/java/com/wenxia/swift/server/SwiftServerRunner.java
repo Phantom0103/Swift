@@ -1,7 +1,7 @@
 package com.wenxia.swift.server;
 
-import com.wenxia.swift.common.codec.KryoDecoder;
-import com.wenxia.swift.common.codec.KryoEncoder;
+import com.wenxia.swift.common.codec.SwiftMessageDecoder;
+import com.wenxia.swift.common.codec.SwiftMessageEncoder;
 import com.wenxia.swift.server.protocol.RpcService;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
@@ -90,8 +90,8 @@ public class SwiftServerRunner implements ApplicationRunner, ApplicationContextA
                         @Override
                         protected void initChannel(SocketChannel channel) throws Exception {
                             ChannelPipeline pipeline = channel.pipeline();
-                            pipeline.addLast(new KryoDecoder());
-                            pipeline.addLast(new KryoEncoder());
+                            pipeline.addLast(new SwiftMessageDecoder());
+                            pipeline.addLast(new SwiftMessageEncoder());
                             pipeline.addLast(handler);
                         }
                     });

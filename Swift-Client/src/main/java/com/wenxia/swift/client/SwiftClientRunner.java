@@ -1,12 +1,12 @@
 package com.wenxia.swift.client;
 
-import com.wenxia.swift.common.codec.KryoDecoder;
-import com.wenxia.swift.common.codec.KryoEncoder;
+import com.wenxia.swift.common.codec.SwiftMessageDecoder;
+import com.wenxia.swift.common.codec.SwiftMessageEncoder;
 import com.wenxia.swift.common.protocol.RpcRequest;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
@@ -21,12 +21,14 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author zhouw
@@ -50,6 +52,21 @@ public class SwiftClientRunner implements ApplicationRunner {
 
     private Bootstrap bootstrap = new Bootstrap();
     private NioEventLoopGroup group = new NioEventLoopGroup();
+
+    public SwiftClientRunner() {
+        bootstrap.group(group)
+                .channel(NioSocketChannel.class)
+                .option(ChannelOption.SO_KEEPALIVE, true)
+                .handler(new ChannelInitializer<SocketChannel>() {
+                    @Override
+                    protected void initChannel(SocketChannel channel) throws Exception {
+                        ChannelPipeline pipeline = channel.pipeline();
+                        pipeline.addLast(new SwiftMessageEncoder());
+                        pipeline.addLast(new SwiftMessageDecoder());
+                        pipeline.addLast(swiftClientHandler);
+                    }
+                });
+    }
 
     @Override
     public void run(ApplicationArguments args) {
@@ -84,19 +101,7 @@ public class SwiftClientRunner implements ApplicationRunner {
     }
 
     private Channel connect(Bootstrap bootstrap, SocketAddress remoteAddress) throws Exception {
-        bootstrap.group(group)
-                .channel(NioSocketChannel.class)
-                .handler(new ChannelInitializer<SocketChannel>() {
-                    @Override
-                    protected void initChannel(SocketChannel channel) throws Exception {
-                        ChannelPipeline pipeline = channel.pipeline();
-                        pipeline.addLast(new KryoEncoder());
-                        pipeline.addLast(new KryoDecoder());
-                        pipeline.addLast(swiftClientHandler);
-                    }
-                });
-        ChannelFuture channelFuture = bootstrap.connect(remoteAddress).sync();
-        return channelFuture.channel();
+        return bootstrap.connect(remoteAddress).sync().channel();
     }
 
     private synchronized Channel connect(String rpcServer) {
@@ -133,11 +138,11 @@ public class SwiftClientRunner implements ApplicationRunner {
         return channel;
     }
 
-    public Object sendRequest(RpcRequest request, String rpcServer) throws InterruptedException {
+    public Object sendRequest(RpcRequest request, String rpcServer) throws InterruptedException, IOException {
         Channel channel = getChannel(rpcServer);
         if (channel != null && channel.isActive()) {
             SynchronousQueue<Object> queue = swiftClientHandler.sendRequest(request, channel);
-            return queue.take();
+            return queue.poll(60, TimeUnit.SECONDS);
         }
 
         LOGGER.error("获取RPC服务器'{}'链接失败", rpcServer);

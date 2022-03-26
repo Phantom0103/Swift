@@ -33,10 +33,6 @@ public class SwiftServerHandler extends SimpleChannelInboundHandler<SwiftMessage
         byte[] content = msg.getContent();
         RpcRequest request = Kryos.deserialize(content, RpcRequest.class);
 
-        if (request == null) {
-            throw new RuntimeException("反序列化RpcRequest异常，获取RpcRequest为空");
-        }
-
         RpcResponse response = new RpcResponse();
         response.setRequestId(request.getId());
 
@@ -48,7 +44,9 @@ public class SwiftServerHandler extends SimpleChannelInboundHandler<SwiftMessage
             response.setErrorMsg(e.toString());
         }
 
-        ctx.writeAndFlush(response);
+        byte[] resContent = Kryos.serialize(response);
+        SwiftMessage message = new SwiftMessage(resContent.length, resContent);
+        ctx.writeAndFlush(message);
     }
 
     private Object handler(RpcRequest request) throws Exception {

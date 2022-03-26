@@ -1,10 +1,14 @@
 package com.wenxia.swift.common.protocol;
 
+import java.io.Serializable;
+
 /**
  * @author zhouw
  * @date 2022-03-15
  */
-public class RpcRequest {
+public class RpcRequest implements Serializable {
+
+    private static final long serialVersionUID = 2104861261275175620L;
 
     private String id;
     private String className;

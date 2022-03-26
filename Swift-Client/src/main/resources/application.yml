@@ -8,5 +8,4 @@ spring:
 
 swift:
   rpc:
-    servers:
-      - rpc-user-server
+    servers: rpc-user-server

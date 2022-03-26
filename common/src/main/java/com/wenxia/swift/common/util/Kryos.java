@@ -3,10 +3,6 @@ package com.wenxia.swift.common.util;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
-import com.wenxia.swift.common.protocol.RpcRequest;
-import com.wenxia.swift.common.protocol.RpcResponse;
-import de.javakaffee.kryoserializers.SynchronizedCollectionsSerializer;
-import de.javakaffee.kryoserializers.UnmodifiableCollectionsSerializer;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -19,15 +15,7 @@ public class Kryos {
 
     private static final ThreadLocal<Kryo> KRYOS = ThreadLocal.withInitial(() -> {
         Kryo kryo = new Kryo();
-        kryo.register(RpcRequest.class);
-        kryo.register(RpcResponse.class);
-        kryo.register(Class.class);
-        kryo.register(Class[].class);
-        kryo.register(Object[].class);
-
-        UnmodifiableCollectionsSerializer.registerSerializers(kryo);
-        SynchronizedCollectionsSerializer.registerSerializers(kryo);
-
+        kryo.setRegistrationRequired(false);
         return kryo;
     });
 
@@ -42,15 +30,10 @@ public class Kryos {
     }
 
     public static <T> T deserialize(byte[] bytes, Class<T> clazz) {
-        if (bytes == null || bytes.length == 0) {
-            return null;
-        }
-
         ByteArrayInputStream in = new ByteArrayInputStream(bytes);
         try (Input input = new Input(in)) {
             Kryo kryo = KRYOS.get();
             return kryo.readObjectOrNull(input, clazz);
         }
     }
-
 }

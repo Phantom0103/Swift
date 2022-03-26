@@ -9,7 +9,7 @@ import io.netty.handler.codec.MessageToByteEncoder;
  * @author zhouw
  * @date 2022-03-16
  */
-public class KryoEncoder extends MessageToByteEncoder<SwiftMessage> {
+public class SwiftMessageEncoder extends MessageToByteEncoder<SwiftMessage> {
 
     @Override
     protected void encode(ChannelHandlerContext ctx, SwiftMessage msg, ByteBuf out) throws Exception {
