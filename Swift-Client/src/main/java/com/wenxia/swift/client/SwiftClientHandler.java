@@ -26,7 +26,7 @@ public class SwiftClientHandler extends SimpleChannelInboundHandler<SwiftMessage
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SwiftClientHandler.class);
 
-    private ConcurrentHashMap<String, SynchronousQueue<Object>> requests = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, SynchronousQueue<Object>> requests = new ConcurrentHashMap<>();
 
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, SwiftMessage swiftMessage) throws Exception {

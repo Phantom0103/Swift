@@ -56,6 +56,7 @@ public class SwiftServerHandler extends SimpleChannelInboundHandler<SwiftMessage
             throw new RuntimeException("未找到RPC服务类：" + className);
         }
 
+        // 通过反射调用业务层
         String methodName = request.getMethodName();
         Object[] parameters = request.getParameters();
         Class<?>[] parameterTypes = request.getParameterTypes();

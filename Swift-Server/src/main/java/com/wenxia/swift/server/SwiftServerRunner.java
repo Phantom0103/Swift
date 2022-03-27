@@ -2,7 +2,6 @@ package com.wenxia.swift.server;
 
 import com.wenxia.swift.common.codec.SwiftMessageDecoder;
 import com.wenxia.swift.common.codec.SwiftMessageEncoder;
-import com.wenxia.swift.server.protocol.RpcService;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -114,6 +113,7 @@ public class SwiftServerRunner implements ApplicationRunner, ApplicationContextA
     }
 
     private void registerRpcServer(String serverName, String rpcServer) throws Exception {
+        // 简单的将rpc server列表保存到redis中
         redisTemplate.opsForHash().put("rpc-server", serverName, rpcServer);
     }
 }

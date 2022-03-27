@@ -2,7 +2,7 @@ package com.wenxia.service;
 
 import com.wenxia.facade.model.User;
 import com.wenxia.facade.service.UserService;
-import com.wenxia.swift.server.protocol.RpcService;
+import com.wenxia.swift.server.RpcService;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;

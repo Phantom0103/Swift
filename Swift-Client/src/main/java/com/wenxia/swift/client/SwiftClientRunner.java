@@ -48,24 +48,22 @@ public class SwiftClientRunner implements ApplicationRunner {
     @Autowired
     private SwiftClientHandler swiftClientHandler;
 
+    // 缓存与多个rpc server的连接
     private final Map<String, Channel> channels = new HashMap<>();
 
     private Bootstrap bootstrap = new Bootstrap();
     private NioEventLoopGroup group = new NioEventLoopGroup();
 
     public SwiftClientRunner() {
-        bootstrap.group(group)
-                .channel(NioSocketChannel.class)
-                .option(ChannelOption.SO_KEEPALIVE, true)
-                .handler(new ChannelInitializer<SocketChannel>() {
-                    @Override
-                    protected void initChannel(SocketChannel channel) throws Exception {
-                        ChannelPipeline pipeline = channel.pipeline();
-                        pipeline.addLast(new SwiftMessageEncoder());
-                        pipeline.addLast(new SwiftMessageDecoder());
-                        pipeline.addLast(swiftClientHandler);
-                    }
-                });
+        bootstrap.group(group).channel(NioSocketChannel.class).option(ChannelOption.SO_KEEPALIVE, true).handler(new ChannelInitializer<SocketChannel>() {
+            @Override
+            protected void initChannel(SocketChannel channel) throws Exception {
+                ChannelPipeline pipeline = channel.pipeline();
+                pipeline.addLast(new SwiftMessageEncoder());
+                pipeline.addLast(new SwiftMessageDecoder());
+                pipeline.addLast(swiftClientHandler);
+            }
+        });
     }
 
     @Override
@@ -91,7 +89,7 @@ public class SwiftClientRunner implements ApplicationRunner {
             try {
                 String[] address = v.split(":");
                 InetSocketAddress remoteAddress = new InetSocketAddress(address[0], Integer.parseInt(address[1]));
-                Channel channel = connect(bootstrap, remoteAddress);
+                Channel channel = connect(remoteAddress);
                 channels.put(rpcServer, channel);
             } catch (Exception e) {
                 LOGGER.error("连接RPC服务端'{}'失败", rpcServer);
@@ -100,7 +98,7 @@ public class SwiftClientRunner implements ApplicationRunner {
         }
     }
 
-    private Channel connect(Bootstrap bootstrap, SocketAddress remoteAddress) throws Exception {
+    private Channel connect(SocketAddress remoteAddress) throws Exception {
         return bootstrap.connect(remoteAddress).sync().channel();
     }
 
@@ -119,7 +117,7 @@ public class SwiftClientRunner implements ApplicationRunner {
         try {
             String[] address = v.split(":");
             InetSocketAddress remoteAddress = new InetSocketAddress(address[0], Integer.parseInt(address[1]));
-            channel = connect(bootstrap, remoteAddress);
+            channel = connect(remoteAddress);
             channels.put(rpcServer, channel);
         } catch (Exception e) {
             LOGGER.error("连接RPC服务端'{}'失败", rpcServer);
@@ -141,8 +139,14 @@ public class SwiftClientRunner implements ApplicationRunner {
     public Object sendRequest(RpcRequest request, String rpcServer) throws InterruptedException, IOException {
         Channel channel = getChannel(rpcServer);
         if (channel != null && channel.isActive()) {
+            // 发送请求后阻塞等待返回结果
             SynchronousQueue<Object> queue = swiftClientHandler.sendRequest(request, channel);
             return queue.poll(60, TimeUnit.SECONDS);
+        }
+
+        if (channel != null) {
+            channel.close();
+            channels.remove(rpcServer);
         }
 
         LOGGER.error("获取RPC服务器'{}'链接失败", rpcServer);

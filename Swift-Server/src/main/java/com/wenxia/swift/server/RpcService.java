@@ -1,4 +1,4 @@
-package com.wenxia.swift.server.protocol;
+package com.wenxia.swift.server;
 
 import org.springframework.stereotype.Component;
 
